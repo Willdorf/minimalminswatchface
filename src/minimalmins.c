@@ -52,54 +52,55 @@ static void draw_watchface(Layer *layer, GContext *ctx) {
 	}
 
 	GRect f = layer_get_frame((Layer *) s_time_layer);
+	int shift = 6;
 	switch (cur_hour) {
 		case 12:
 			f.origin.x = 59;
-			f.origin.y = 13;
+			f.origin.y = 13 - shift;
 			break;
 		case 1:
 			f.origin.x = 84;
-			f.origin.y = 24;
+			f.origin.y = 24 - shift;
 			break;
 		case 2:
 			f.origin.x = 105;
-			f.origin.y = 48;
+			f.origin.y = 48 - shift;
 			break;
 		case 3:
 			f.origin.x = 113;
-			f.origin.y = 72;
+			f.origin.y = 72 - shift;
 			break;
 		case 4:
 			f.origin.x = 105;
-			f.origin.y = 96;
+			f.origin.y = 96 - shift;
 			break;
 		case 5:
 			f.origin.x = 84;
-			f.origin.y = 120;
+			f.origin.y = 120 - shift;
 			break;
 		case 6:
 			f.origin.x = 59;
-			f.origin.y = 131;
+			f.origin.y = 131 - shift;
 			break;
 		case 7:
 			f.origin.x = 34;
-			f.origin.y = 120;
+			f.origin.y = 120 - shift;
 			break;
 		case 8:
 			f.origin.x = 13;
-			f.origin.y = 96;
+			f.origin.y = 96 - shift;
 			break;
 		case 9:
 			f.origin.x = 5;
-			f.origin.y = 72;
+			f.origin.y = 72 - shift;
 			break;
 		case 10:
 			f.origin.x = 12;
-			f.origin.y = 48;
+			f.origin.y = 48 - shift;
 			break;
 		case 11:
 			f.origin.x = 34;
-			f.origin.y = 24;
+			f.origin.y = 24 - shift;
 			break;
 		default:
 			APP_LOG(APP_LOG_LEVEL_DEBUG, "invalid hour %d", cur_hour);

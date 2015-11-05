@@ -1,8 +1,8 @@
 {
   "uuid": "a607e98c-4327-44a8-9c19-8827891debd5",
-  "shortName": "minimalmins",
-  "longName": "minimalmins",
-  "companyName": "MakeAwesomeHappen",
+  "shortName": "Minimal Mins",
+  "longName": "Minimal Mins",
+  "companyName": "Willdorf",
   "versionLabel": "1.0",
   "sdkVersion": "3",
   "targetPlatforms": ["basalt"],

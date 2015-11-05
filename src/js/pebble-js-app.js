@@ -3,7 +3,7 @@ Pebble.addEventListener('ready', function() {
 });
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'http://42aba814.ngrok.io';
+	var url = 'http://armstrongwill.com/pebbleconfigurationpages/minimalmins/index.html';
 
 	console.log('Showing configuration page: ' + url);
 

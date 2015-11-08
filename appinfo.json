@@ -22,7 +22,12 @@
                 "type" : "png",
                 "name" : "IMAGE_MENU_ICON",
                 "file" : "menu.png"
-        }
+        },
+	{
+		"type" : "png",
+		"name" : "IMAGE_BT_ICON",
+		"file" : "bt-icon.png"
+	}
 	]
   }
 }

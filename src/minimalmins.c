@@ -157,6 +157,9 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
 	text_layer_destroy(s_time_layer);
+
+	//destroy the main layer
+	layer_destroy(s_layer);
 }
 
 static void init(void) {

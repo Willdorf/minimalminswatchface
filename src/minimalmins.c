@@ -8,20 +8,37 @@ static TextLayer *s_time_layer;
 
 static GColor background_color;
 
-static BitmapLayer *s_bt_icon_layer;
-static GBitmap *s_bt_icon_bitmap;
+static Layer *s_bluetooth_icon_layer;
+static bool s_bluetooth_connected;
 
 static uint8_t s_hour;
 static uint8_t s_min;
 static uint8_t s_sec;
 
-static void bluetooth_callback(bool connected) {
-	// show icon if disconnected
-	layer_set_hidden(bitmap_layer_get_layer(s_bt_icon_layer), connected);
+static const GPathInfo BLUETOOTH_INFO = {
+	.num_points = 9,
+	.points = (GPoint []) {{3,26},{26,3},{14,15},{14,26},{20,20},{9,9},{14,14},{14,3},{20,9}}
+};
 
+GPath *bluetooth_path = NULL;
+
+static void bluetooth_callback(bool connected) {
+	
+	//show icon if disconnected
 	if (!connected) {
 		//issue a vibrating alert
 		vibes_double_pulse();
+	}
+	
+	s_bluetooth_connected = connected;
+	layer_mark_dirty(s_bluetooth_icon_layer);
+}
+
+static void bluetooth_update_proc(Layer *layer, GContext *ctx) {
+	if (!s_bluetooth_connected) {
+		graphics_context_set_stroke_width(ctx, 3);
+		graphics_context_set_stroke_color(ctx, gcolor_legible_over(background_color));
+		gpath_draw_outline(ctx, bluetooth_path);
 	}
 }
 
@@ -167,13 +184,10 @@ static void window_load(Window *window) {
 	  background_color = GColorWhite;
   }
 
-  // Create the Bluetooth icon GBitmap
-  s_bt_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_ICON);
-
-  // Create the BitmapLayer to display the GBitmap
-  s_bt_icon_layer = bitmap_layer_create(GRect(0, 0, 30, 30));
-  bitmap_layer_set_bitmap(s_bt_icon_layer, s_bt_icon_bitmap);
-  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_bt_icon_layer));
+  s_bluetooth_icon_layer = layer_create(GRect(0,0,30,30));
+  layer_set_update_proc(s_bluetooth_icon_layer, bluetooth_update_proc);
+  bluetooth_path = gpath_create(&BLUETOOTH_INFO);
+  layer_add_child(window_get_root_layer(window), s_bluetooth_icon_layer);
 
   //show the correct state of the bluetooth connection from the start
 #ifdef PBL_SDK_2
@@ -190,8 +204,8 @@ static void window_unload(Window *window) {
 	layer_destroy(s_layer);
 
 	//destroy the bluetooth stuffs
-	gbitmap_destroy(s_bt_icon_bitmap);
-	bitmap_layer_destroy(s_bt_icon_layer);
+	layer_destroy(s_bluetooth_icon_layer);
+	gpath_destroy(bluetooth_path);
 }
 
 static void init(void) {

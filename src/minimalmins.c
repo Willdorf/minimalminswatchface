@@ -2,10 +2,14 @@
 
 #define KEY_BACKGROUND_COLOR 0
 
+#define KEY_TEMPERATURE 1
+#define KEY_CONDITIONS 2
+
 static Window *window;
 static Layer *s_layer;
 static TextLayer *s_time_layer;
 static TextLayer *s_date_layer;
+static TextLayer *s_weather_layer;
 
 static GColor background_color;
 
@@ -156,6 +160,29 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "inbox received handler");
 	Tuple *background_color_t = dict_find(iter, KEY_BACKGROUND_COLOR);
 
+	Tuple *temp_t = dict_find(iter, KEY_TEMPERATURE);
+	Tuple *conditions_t = dict_find(iter, KEY_CONDITIONS);
+
+	//Store incoming information
+	static char temperature_buffer[8];
+	static char conditions_buffer[32];
+	static char weather_layer_buffer[42];
+
+	if (temp_t) {
+		snprintf(temperature_buffer, sizeof(temperature_buffer), "%d\u00B0", (int) temp_t->value->int32);
+	}
+
+	if (conditions_t) {
+		snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions_t->value->cstring);
+	}
+
+	if (conditions_t && temp_t) {
+		snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+		text_layer_set_text_color(s_weather_layer, gcolor_legible_over(background_color));
+		text_layer_set_text(s_weather_layer, weather_layer_buffer);
+	}
+
+
 	if (background_color_t) {
 		int bc = background_color_t->value->int32;
 		if (bc == 0) { //quick fix so that black colour persists
@@ -171,6 +198,18 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 	time_t start_time = time(NULL);
 	update_time(localtime(&start_time));
+}
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+	APP_LOG(APP_LOG_LEVEL_ERROR, "Message Dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+	APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+	APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
 static void window_load(Window *window) {
@@ -194,6 +233,13 @@ static void window_load(Window *window) {
   } else {
 	  background_color = GColorWhite;
   }
+  s_weather_layer = text_layer_create(GRect(0,152, 144, 14));
+  text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  text_layer_set_background_color(s_weather_layer, GColorClear);
+  text_layer_set_text_color(s_weather_layer, gcolor_legible_over(background_color));
+  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentRight);
+  text_layer_set_text(s_weather_layer, "Loading...");
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
 
   s_bluetooth_icon_layer = layer_create(GRect(0,0,30,30));
   layer_set_update_proc(s_bluetooth_icon_layer, bluetooth_update_proc);
@@ -224,6 +270,9 @@ static void window_unload(Window *window) {
 	//destroy the date layer
 	text_layer_destroy(s_date_layer);
 
+	//destroy the weather layer
+	text_layer_destroy(s_weather_layer);
+
 	//destroy the bluetooth stuffs
 	layer_destroy(s_bluetooth_icon_layer);
 	gpath_destroy(bluetooth_path);
@@ -241,7 +290,13 @@ static void init(void) {
   //Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 
+  //Register Callbacks
   app_message_register_inbox_received(inbox_received_handler);
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
+  
+  //open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
   //Register for Bluetooth connections updates

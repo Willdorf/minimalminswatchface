@@ -15,7 +15,8 @@
   "appKeys": {
     "backgroundColor": 0,
     "KEY_TEMPERATURE" : 1,
-    "KEY_CONDITIONS" : 2
+    "KEY_CONDITIONS" : 2,
+    "degreeOption" : 3
   },
   "resources": {
     "media": [

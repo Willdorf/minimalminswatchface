@@ -54,7 +54,7 @@ function loadOptions() {
 		$backgroundColorPicker[0].value = localStorage.willdorfminimalminsbackgroundColor;
 
 		//set the corresponding tab to active
-		degreeOption = localStorage.willdorfminimalheartsdegreeOption;
+		degreeOption = localStorage.willdorfminimalminsdegreeOption;
 		if (degreeOption == 0) {
 			$('#Celsius').attr('class', 'tab-button active');
 		} else {
